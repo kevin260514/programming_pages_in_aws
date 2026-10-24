@@ -1,0 +1,37 @@
+@'
+# ---------- Global ----------
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.tmp
+
+# ---------- Variables de entorno ----------
+.env
+!.env.example
+
+# ---------- IDEs ----------
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# ---------- Backend (Java / Maven) ----------
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.class
+backend/*.jar
+backend/*.war
+backend/hs_err_pid*
+
+# ---------- Frontend ----------
+frontend/node_modules/
+frontend/dist/
+
+# ---------- Docker ----------
+postgres-data/
+'@ | Set-Content -Path .gitignore -Encoding ascii
