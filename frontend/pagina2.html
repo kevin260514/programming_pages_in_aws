@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explorador de APIs · PAG</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/explorer.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/cascade.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>PAG</h1>
+    <p class="subtitle">Página 2 · Explorador de APIs</p>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="index.html">Estudiantes</a>
+      <a href="pagina2.html" aria-current="page">Explorador de APIs</a>
+    </nav>
+  </header>
+
+  <main class="stack">
+    <section class="panel" id="explorer" aria-labelledby="explorer-title">
+      <h2 id="explorer-title">Personajes de Rick &amp; Morty</h2>
+    </section>
+
+    <section class="panel" id="cascade" aria-labelledby="cascade-title">
+      <h2 id="cascade-title">Pokédex en cascada</h2>
+    </section>
+  </main>
+
+  <div id="modal-root"></div>
+
+  <script src="js/explorer.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/cascade.js"></script>
+</body>
+</html>
