@@ -3,20 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PAG</title>
+  <title>Estudiantes · PAG</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <main class="card">
+  <header class="topbar">
     <h1>PAG</h1>
-    <p class="subtitle">Monorepo · Spring Boot · Docker</p>
+    <p class="subtitle">Página 1 · Gestión de estudiantes</p>
+  </header>
 
-    <div class="status" id="status" data-state="loading">
-      <span class="dot"></span>
-      <span id="status-text">Comprobando conexión con el backend…</span>
-    </div>
+  <main class="layout">
+    <section class="panel" aria-labelledby="form-title">
+      <h2 id="form-title">Registrar estudiante</h2>
 
-    <button id="retry" type="button">Reintentar</button>
+      <form id="student-form" novalidate>
+        <input type="hidden" id="student-id" />
+
+        <label for="cedula">Cédula</label>
+        <input id="cedula" name="cedula" type="text" inputmode="numeric"
+               maxlength="10" pattern="\d{10}" placeholder="10 dígitos" required />
+
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" name="nombre" type="text" maxlength="100" required />
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" maxlength="120" required />
+
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" name="telefono" type="tel" inputmode="numeric"
+               pattern="\d{7,15}" placeholder="Solo dígitos" required />
+
+        <label for="direccion">Dirección</label>
+        <input id="direccion" name="direccion" type="text" maxlength="200" required />
+
+        <label for="fechaNacimiento">Fecha de nacimiento</label>
+        <input id="fechaNacimiento" name="fechaNacimiento" type="date" required />
+
+        <div class="actions">
+          <button type="submit" id="submit-btn" class="btn primary">Guardar</button>
+          <button type="button" id="cancel-btn" class="btn" hidden>Cancelar edición</button>
+        </div>
+      </form>
+
+      <p id="message" class="message" role="status" aria-live="polite" hidden></p>
+    </section>
+
+    <section class="panel" aria-labelledby="list-title">
+      <div class="list-header">
+        <h2 id="list-title">Estudiantes registrados</h2>
+        <span id="counter" class="counter">0</span>
+      </div>
+      <div id="students" class="cards"></div>
+      <p id="empty" class="empty" hidden>Todavía no hay estudiantes registrados.</p>
+    </section>
   </main>
 
   <script src="js/config.js"></script>
