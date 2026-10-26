@@ -28,6 +28,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-pagdb}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-paguser}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-pagpass}
+      # Asistente de IA (PAG-30). Si no defines GEMINI_API_KEY el resto de la app funciona igual.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
 
