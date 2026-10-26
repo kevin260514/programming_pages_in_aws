@@ -1,0 +1,64 @@
+# Docker Compose de PRODUCCION (PAG-25).
+#
+# Diferencias con docker-compose.yml (desarrollo):
+#   * Solo el frontend publica un puerto (HTTP_PORT, 80 por defecto).
+#     La base de datos y el backend quedan dentro de la red de Docker.
+#   * Nginx reenvia /api/* al backend (deploy/nginx.conf), sin CORS.
+#   * No hay claves por defecto: POSTGRES_PASSWORD es obligatoria.
+#   * Cada imagen lleva nombre, para poder subirla a un registro.
+#
+# Uso:
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pag-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pagdb}
+      POSTGRES_USER: ${POSTGRES_USER:-paguser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-paguser} -d ${POSTGRES_DB:-pagdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: ${IMAGE_PREFIX:-pag}-backend:${IMAGE_TAG:-latest}
+    container_name: pag-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-pagdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-paguser}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      JAVA_TOOL_OPTIONS: -Xmx384m
+      # Asistente de IA (PAG-30). Sin GEMINI_API_KEY el resto de la app funciona igual.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-60}
+    expose:
+      - "8080"
+
+  frontend:
+    build: ./frontend
+    image: ${IMAGE_PREFIX:-pag}-frontend:${IMAGE_TAG:-latest}
+    container_name: pag-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/js/config.prod.js:/usr/share/nginx/html/js/config.js:ro
+
+volumes:
+  postgres-data:
