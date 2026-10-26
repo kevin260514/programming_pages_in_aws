@@ -1,0 +1,195 @@
+/* ==========================================================================
+   PAG-23 · Diseño responsive (teléfono, tablet y escritorio)
+   Se carga el ÚLTIMO en index.html y pagina2.html, así que complementa
+   a los demás CSS sin modificarlos.
+
+   Puntos de quiebre (mobile-first):
+     base      0 - 599 px   teléfono
+     >= 600px  600 - 899    tablet vertical (>= 700: formulario y lista lado a lado)
+     >= 900px  900 - 1279   tablet horizontal / portátil pequeño
+     >= 1280px 1280 +       escritorio (el contenido se centra y se limita)
+   ========================================================================== */
+
+:root {
+  --page-max: 1400px;   /* ancho máximo del contenido en pantallas grandes */
+  --tap: 44px;          /* tamaño mínimo recomendado de un objetivo táctil */
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img { max-width: 100%; }
+
+/* Mismo ancho máximo en cabecera y contenido (anula el 1000 px de nav.css). */
+.stack { max-width: var(--page-max); }
+
+/* ---------- Base (teléfono) ---------- */
+
+/* Respeta el notch y las barras redondeadas en teléfonos con "safe areas". */
+.topbar,
+.layout,
+.stack {
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+.topbar { padding-top: max(16px, env(safe-area-inset-top)); }
+.layout, .stack { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+
+.topbar h1 { font-size: 1.6rem; }
+.panel { padding: 16px; border-radius: 14px; }
+
+/* iOS hace zoom automático en campos con fuente < 16 px: se evita. */
+form input,
+.search input[type="search"],
+.cascade-field select {
+  min-height: var(--tap);
+  font-size: 16px;
+}
+
+/* Objetivos táctiles de al menos 44 px. */
+.btn {
+  min-height: var(--tap);
+  padding: 10px 18px;
+  font-size: 1rem;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 8px 16px;
+}
+
+/* En teléfono los botones del formulario ocupan todo el ancho. */
+.actions .btn { flex: 1 1 100%; }
+
+/* Botones Editar / Eliminar de cada tarjeta: mitad y mitad. */
+.card-actions .btn { flex: 1 1 0; }
+
+/* Tarjetas de personajes: 2 columnas en teléfono en vez de 1 gigante. */
+#explorer .cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#explorer .character-card { padding: 10px; }
+#explorer .character-card h3 { font-size: 0.95rem; }
+
+.counter { margin-bottom: 16px; }
+
+/* El modal usa dvh: en móviles la barra del navegador no lo corta. */
+.modal-overlay {
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+           max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+
+.modal { max-height: calc(100vh - 24px); }
+
+@supports (height: 100dvh) {
+  .modal { max-height: calc(100dvh - 24px); }
+  body { min-height: 100dvh; }
+}
+
+.modal { overscroll-behavior: contain; }
+
+/* Evita que un texto largo (por ejemplo un email) rompa la tarjeta. */
+.card h3,
+.card p,
+.modal-body h3,
+.pokemon-info h3 { overflow-wrap: anywhere; }
+
+/* Usuarios que piden menos movimiento: sin animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* La barra de espera del buscador sigue siendo informativa: se muestra llena. */
+  .bar.running { width: 100%; }
+}
+
+/* ---------- Dispositivos táctiles: sin efecto :hover pegado ---------- */
+@media (hover: none) {
+  /* Solo los botones SIN relleno vuelven a transparente; el primario conserva su color. */
+  .btn:not(.primary):hover,
+  .nav a:not([aria-current="page"]):hover { background: transparent; }
+  .btn.primary:hover { filter: none; }
+}
+
+/* ---------- >= 600 px: tablet vertical ---------- */
+@media (min-width: 600px) {
+  .topbar h1 { font-size: 1.8rem; }
+  .panel { padding: 20px; border-radius: 16px; }
+
+  .actions .btn { flex: 0 0 auto; }
+  .card-actions .btn { flex: 0 0 auto; }
+
+  #explorer .cards {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+  }
+  #explorer .character-card { padding: 14px; }
+  #explorer .character-card h3 { font-size: 1rem; }
+
+  .modal { max-height: calc(100vh - 32px); }
+  @supports (height: 100dvh) { .modal { max-height: calc(100dvh - 32px); } }
+}
+
+/* ---------- >= 700 px: Página 1 en dos paneles (formulario + lista) ---------- */
+@media (min-width: 700px) {
+  .layout {
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+
+/* ---------- >= 900 px: tablet horizontal / portátil ---------- */
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .topbar, .layout, .stack { padding-left: 24px; padding-right: 24px; }
+}
+
+/* ---------- >= 1100 px: Página 2 en dos columnas ---------- */
+@media (min-width: 1100px) {
+  .stack {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+/* ---------- >= 1280 px: escritorio ---------- */
+@media (min-width: 1280px) {
+  .topbar,
+  .layout,
+  .stack {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Con ratón no hace falta un objetivo de 44 px: se vuelve más compacto. */
+  @media (pointer: fine) {
+    .btn { min-height: 38px; padding: 8px 16px; font-size: 0.9rem; }
+    .nav a { min-height: 36px; }
+    form input,
+    .search input[type="search"],
+    .cascade-field select { min-height: 40px; font-size: 0.95rem; }
+  }
+
+}
+
+/* ---------- Teléfono apaisado (poca altura) ---------- */
+@media (max-height: 480px) and (orientation: landscape) {
+  .modal { grid-template-columns: minmax(160px, 240px) 1fr; }
+  .modal-image { min-height: 160px; height: auto; }
+}
