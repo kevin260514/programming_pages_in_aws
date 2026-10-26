@@ -57,3 +57,5 @@ actualiza esa lista y la constante `API_BASE_URL` en `frontend/js/config.js`.
 - PAG-15 Inicializar carpetas del monorepo
 - PAG-16 Crear API de Spring Boot con CORS
 - PAG-17 Configurar Dockerfile y Docker Compose
+## DOCUMENTACION EN JIRA 
+https://uce-team-xkg79ev6.atlassian.net/jira/software/projects/PAG/boards/2?filter=&groupBy=none
