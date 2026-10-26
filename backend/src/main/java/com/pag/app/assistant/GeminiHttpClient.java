@@ -38,13 +38,17 @@ public class GeminiHttpClient implements GeminiClient {
     private final String model;
     private final String baseUrl;
     private final Duration timeout;
+    private final int retries;
+    private final long retryDelayMillis;
 
     public GeminiHttpClient(
             ObjectMapper mapper,
             @Value("${gemini.api-key:}") String apiKey,
             @Value("${gemini.model:gemini-3.8-flash}") String model,
             @Value("${gemini.base-url:https://generativelanguage.googleapis.com/v1beta}") String baseUrl,
-            @Value("${gemini.timeout-seconds:20}") long timeoutSeconds) {
+            @Value("${gemini.timeout-seconds:20}") long timeoutSeconds,
+            @Value("${gemini.retries:2}") int retries,
+            @Value("${gemini.retry-delay-ms:1000}") long retryDelayMillis) {
         if (!MODEL_NAME.matcher(model).matches()) {
             throw new IllegalArgumentException("Nombre de modelo no valido: " + model);
         }
@@ -53,6 +57,8 @@ public class GeminiHttpClient implements GeminiClient {
         this.model = model;
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.timeout = Duration.ofSeconds(timeoutSeconds);
+        this.retries = retries;
+        this.retryDelayMillis = retryDelayMillis;
         this.http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
     }
 
@@ -71,9 +77,20 @@ public class GeminiHttpClient implements GeminiClient {
                 .POST(HttpRequest.BodyPublishers.ofString(buildBody(systemInstruction, userPrompt)))
                 .build();
 
-        HttpResponse<String> response;
+        HttpResponse<String> response = send(request);
+        // 503 = modelo saturado: suele ser momentáneo, se reintenta con una pausa creciente
+        for (int attempt = 0; response.statusCode() == 503 && attempt < retries; attempt++) {
+            log.info("Gemini saturado (503), reintento {} de {}", attempt + 1, retries);
+            pause(retryDelayMillis * (attempt + 1));
+            response = send(request);
+        }
+
+        return readAnswer(response);
+    }
+
+    private HttpResponse<String> send(HttpRequest request) {
         try {
-            response = http.send(request, HttpResponse.BodyHandlers.ofString());
+            return http.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (HttpTimeoutException e) {
             throw new AssistantException(HttpStatus.GATEWAY_TIMEOUT,
                     "Gemini tardó demasiado en responder. Inténtalo de nuevo.");
@@ -85,8 +102,15 @@ public class GeminiHttpClient implements GeminiClient {
             Thread.currentThread().interrupt();
             throw new AssistantException(HttpStatus.BAD_GATEWAY, "La consulta a Gemini fue interrumpida.");
         }
+    }
 
-        return readAnswer(response);
+    private static void pause(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssistantException(HttpStatus.BAD_GATEWAY, "La consulta a Gemini fue interrumpida.");
+        }
     }
 
     private String buildBody(String systemInstruction, String userPrompt) {
@@ -112,6 +136,10 @@ public class GeminiHttpClient implements GeminiClient {
         if (status == 429) {
             throw new AssistantException(HttpStatus.TOO_MANY_REQUESTS,
                     "Se alcanzó el límite de uso del plan gratuito de Gemini. Espera un momento e inténtalo de nuevo.");
+        }
+        if (status == 503) {
+            throw new AssistantException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "El modelo de Gemini está saturado en este momento. Inténtalo de nuevo en unos segundos.");
         }
         if (status < 200 || status >= 300) {
             log.warn("Gemini respondio HTTP {}: {}", status, shorten(response.body(), 300));

@@ -31,6 +31,7 @@ services:
       # Asistente de IA (PAG-30). Si no defines GEMINI_API_KEY el resto de la app funciona igual.
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-60}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
 
