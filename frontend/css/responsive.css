@@ -1,3 +1,14 @@
+/* ==========================================================================
+   PAG-23 · Diseño responsive (teléfono, tablet y escritorio)
+   Se carga el ÚLTIMO en index.html y pagina2.html, así que complementa
+   a los demás CSS sin modificarlos.
+
+   Puntos de quiebre (mobile-first):
+     base      0 - 599 px   teléfono
+     >= 600px  600 - 899    tablet vertical (>= 700: formulario y lista lado a lado)
+     >= 900px  900 - 1279   tablet horizontal / portátil pequeño
+     >= 1280px 1280 +       escritorio (el contenido se centra y se limita)
+   ========================================================================== */
 
 :root {
   --page-max: 1400px;   /* ancho máximo del contenido en pantallas grandes */
@@ -104,10 +115,10 @@ form input,
 
 /* ---------- Dispositivos táctiles: sin efecto :hover pegado ---------- */
 @media (hover: none) {
-  .btn:hover,
-  .nav a:hover { background: transparent; }
+  /* Solo los botones SIN relleno vuelven a transparente; el primario conserva su color. */
+  .btn:not(.primary):hover,
+  .nav a:not([aria-current="page"]):hover { background: transparent; }
   .btn.primary:hover { filter: none; }
-  .nav a[aria-current="page"]:hover { background: var(--accent); }
 }
 
 /* ---------- >= 600 px: tablet vertical ---------- */
